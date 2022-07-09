@@ -5,7 +5,7 @@ bot = commands.Bot(command_prefix="~")
 @bot.command()
 async def ttt(ctx):
     spaces = [1,2,3,4,5,6,7,8,9]
-    state = ["","","","","","","","",""]
+    state = ["-","-","-","-","-","-","-","-","-"]
     symbols = ["x","o"]
     x = None
     o = None
@@ -15,7 +15,7 @@ async def ttt(ctx):
     def check(m):
         return m.author==ctx.author and m.channel.type==discord.ChannelType.private
     oppMsg = await bot.wait_for("message",check=check)
-    opponent = MemberConverter().convert(ctx,oppMsg.content)
+    opponent = await MemberConverter().convert(ctx,oppMsg.content)
     await ctx.author.send("Are you x or o?")
     def check2(m):
         return m.author==ctx.author and m.channel.type==discord.ChannelType.private and m.content.lower() in symbols
@@ -26,39 +26,62 @@ async def ttt(ctx):
     else:
         x = opponent
         o = ctx.author
-    while True:
+        await ctx.channel.send("<@"+str(opponent.id)+"> <@"+str(ctx.author.id)+"> challenged you to Tic-Tac-Toe!")
         await ctx.channel.send("---|---|---\n---|---|---")
+    while True:
         def check3(m):
-            m.author==x and m.channel==ctx.channel and int(m.content) in spaces
-        def check4(m):
-            m.author==o and m.channel==ctx.channel and int(m.content) in spaces
+            return m.author==x and m.channel==ctx.channel and int(m.content) in spaces
         xMsg = await bot.wait_for("message",check=check3)
         state[int(xMsg.content)-1] = "x"
-        spaces.remove(spaces[int(xMsg.content)-1])
-        oMsg = await bot.wait_for("message",check=check4)
-        state[int(oMsg.content)-1] = "o"
-        spaces.remove(spaces[int(oMsg.content)-1])
-        await ctx.channel.send(state[0]+state[1]+state[2]+"\n"+state[3]+state[4]+state[5]+"\n"+state[6]+state[7]+state[8])
+        spaces.remove(int(xMsg.content))
+        await ctx.channel.send(state[0]+"  "+state[1]+"  "+state[2]+"\n"+state[3]+"  "+state[4]+"  "+state[5]+"\n"+state[6]+"  "+state[7]+"  "+state[8])
         if len(spaces)==0:
             await ctx.channel.send("The game ended in a draw.")
             return
         elif state[0]==state[1]==state[2]=="x" or state[3]==state[4]==state[5]=="x" or state[6]==state[7]==state[8]=="x":
-            await ctx.channel.send(str(x)+" matched horizontally! GG.")
+            await ctx.channel.send("<@"+str(x.id)+">"+" matched horizontally! GG.")
             return
         elif state[0]==state[3]==state[6]=="x" or state[1]==state[4]==state[7]=="x" or state[3]==state[5]==state[8]=="x":
-            await ctx.channel.send(str(x)+" matched vertically! GG.")
+            await ctx.channel.send("<@"+str(x.id)+">"+" matched vertically! GG.")
             return
         elif state[0]==state[4]==state[8]=="x" or state[2]==state[4]==state[6]=="x":
-            await ctx.channel.send(str(x)+" matched diagonally! GG.")
+            await ctx.channel.send("<@"+str(x.id)+">"+" matched diagonally! GG.")
             return
         elif state[0]==state[1]==state[2]=="o" or state[3]==state[4]==state[5]=="o" or state[6]==state[7]==state[8]=="o":
-            await ctx.channel.send(str(o)+" matched horizontally! GG.")
+            await ctx.channel.send("<@"+str(o.id)+">"+" matched horizontally! GG.")
             return
         elif state[0]==state[3]==state[6]=="o" or state[1]==state[4]==state[7]=="o" or state[3]==state[5]==state[8]=="o":
-            await ctx.channel.send(str(o)+" matched vertically! GG.")
+            await ctx.channel.send("<@"+str(o.id)+">"+" matched vertically! GG.")
             return
         elif state[0]==state[4]==state[8]=="o" or state[2]==state[4]==state[6]=="o":
-            await ctx.channel.send(str(o)+" matched diagonally! GG.")
+            await ctx.channel.send("<@"+str(o.id)+">"+" matched diagonally! GG.")
+            return
+        def check4(m):
+           return m.author==o and m.channel==ctx.channel and int(m.content) in spaces
+        oMsg = await bot.wait_for("message",check=check4)
+        state[int(oMsg.content)-1] = "o"
+        spaces.remove(int(oMsg.content))
+        await ctx.channel.send(state[0]+"  "+state[1]+"  "+state[2]+"\n"+state[3]+"  "+state[4]+"  "+state[5]+"\n"+state[6]+"  "+state[7]+"  "+state[8])
+        if len(spaces)==0:
+            await ctx.channel.send("The game ended in a draw.")
+            return
+        elif state[0]==state[1]==state[2]=="x" or state[3]==state[4]==state[5]=="x" or state[6]==state[7]==state[8]=="x":
+            await ctx.channel.send("<@"+str(x.id)+">"+" matched horizontally! GG.")
+            return
+        elif state[0]==state[3]==state[6]=="x" or state[1]==state[4]==state[7]=="x" or state[3]==state[5]==state[8]=="x":
+            await ctx.channel.send("<@"+str(x.id)+">"+" matched vertically! GG.")
+            return
+        elif state[0]==state[4]==state[8]=="x" or state[2]==state[4]==state[6]=="x":
+            await ctx.channel.send("<@"+str(x.id)+">"+" matched diagonally! GG.")
+            return
+        elif state[0]==state[1]==state[2]=="o" or state[3]==state[4]==state[5]=="o" or state[6]==state[7]==state[8]=="o":
+            await ctx.channel.send("<@"+str(o.id)+">"+" matched horizontally! GG.")
+            return
+        elif state[0]==state[3]==state[6]=="o" or state[1]==state[4]==state[7]=="o" or state[3]==state[5]==state[8]=="o":
+            await ctx.channel.send("<@"+str(o.id)+">"+" matched vertically! GG.")
+            return
+        elif state[0]==state[4]==state[8]=="o" or state[2]==state[4]==state[6]=="o":
+            await ctx.channel.send("<@"+str(o.id)+">"+" matched diagonally! GG.")
             return
 bot.run("OTIyMjcxNzI2NjAyMTc4NTkw.GmAxDD.aA0v-DasVSYrGmXh3Zr2z3nK7QMa_7ny0du4RY")
 
